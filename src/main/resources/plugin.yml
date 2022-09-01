@@ -1,0 +1,7 @@
+main: loupgarou.App
+name: LoupGarou
+author: Switchoz
+version: 0.1
+depend: [ProtocolLib]
+commands:
+  lg:
