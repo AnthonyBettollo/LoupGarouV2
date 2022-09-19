@@ -1,4 +1,4 @@
-package loupgarou.utils;
+package loupgarou.classes.utils;
 
 import java.util.ArrayList;
 
