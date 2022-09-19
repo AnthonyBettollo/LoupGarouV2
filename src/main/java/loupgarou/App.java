@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.ListIterator;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -16,7 +17,10 @@ import org.bukkit.plugin.java.JavaPlugin;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
 
-import loupgarou.utils.Utils;
+import loupgarou.classes.Game;
+import loupgarou.classes.SpawnHandler;
+import loupgarou.classes.roles.LGRole;
+import loupgarou.classes.utils.Utils;
 
 public class App extends JavaPlugin {
 	@Override
@@ -25,6 +29,7 @@ public class App extends JavaPlugin {
 		if (!new File(getDataFolder(), "config.yml").exists()) {// Créer la config
 			FileConfiguration config = getConfig();
 			config.set("spawns", new ArrayList<List<Location>>());
+			config.set("roles", LGRole.InitRoles());
 			// for(String role : roles.keySet())//Nombre de participant pour chaque rôle
 			// config.set("role."+role, 1);
 
@@ -66,14 +71,18 @@ public class App extends JavaPlugin {
 					case "start":
 						List<Player> players = new ArrayList<>(Bukkit.getOnlinePlayers());
 						List<Location> spawnList = (List<Location>) getConfig().getList("spawns");
-						if(spawnList.size() < players.size())
-						{
+						List<LGRole> roles = (List<LGRole>) getConfig().getList("roles");
+						if (spawnList.size() < players.size()) {
 							sender.sendMessage("Pas assez de position pour le nombre de joueurs !");
 							return true;
 						}
-						for (Player player : players) {
-							player.teleport(spawnList.get(players.indexOf(player)));
+
+						if (roles.size() < players.size()) {
+							sender.sendMessage("Pas assez de roles pour le nombre de joueurs !");
+							return true;
 						}
+
+						new Game().start(players, spawnList, roles);
 						break;
 					case "end":
 						break;
@@ -84,6 +93,18 @@ public class App extends JavaPlugin {
 					case "reloadConfig":
 						break;
 					case "roles":
+						List<LGRole> displayRoles = (List<LGRole>) getConfig().getList("roles");
+						if (args.length > 1) {
+
+						} else {
+							ArrayList<String> displayRolesName = new ArrayList<String>();
+							ListIterator<LGRole> roleIterator = displayRoles.listIterator();
+							while(roleIterator.hasNext()){
+								displayRolesName.add(roleIterator.next().Definition());
+							}
+							sender.sendMessage("Liste des rôles disponibles :");
+							sender.sendMessage(String.format("/lg %s", Utils.customJoin(',', displayRolesName)));
+						}
 						break;
 					case "reloadPack":
 						break;
