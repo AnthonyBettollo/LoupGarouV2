@@ -1,4 +1,4 @@
-package loupgarou.classes;
+package loupgarou.classes.utils;
 
 import java.util.List;
 
@@ -7,7 +7,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import loupgarou.App;
-import loupgarou.classes.utils.Utils;
 
 public class SpawnHandler {
     public static void handleSpawn(CommandSender sender, String[] args, List<Location> locations, String action,

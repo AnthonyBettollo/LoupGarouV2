@@ -18,27 +18,32 @@ import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
 
 import loupgarou.classes.Game;
-import loupgarou.classes.SpawnHandler;
 import loupgarou.classes.roles.LGRole;
+import loupgarou.classes.roles.RolesConfig;
+import loupgarou.classes.utils.SpawnHandler;
 import loupgarou.classes.utils.Utils;
 
 public class App extends JavaPlugin {
+	private static App instance;
+	public static App getInstance()
+	{
+		return instance;
+	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public void onEnable() {
+		instance = this;
 		getLogger().info("Wesh on load le LG trkl le couz!");
 		if (!new File(getDataFolder(), "config.yml").exists()) {// Créer la config
 			FileConfiguration config = getConfig();
 			config.set("spawns", new ArrayList<List<Location>>());
-			config.set("roles", LGRole.InitRoles());
+			config.set("roles", RolesConfig.GetDefaultConfig());
 			// for(String role : roles.keySet())//Nombre de participant pour chaque rôle
 			// config.set("role."+role, 1);
 
 			saveConfig();
 		}
-		List<String> configRoles = (List<String>) getConfig().getList("roles");
-		LGRole.setRoles(LGRole.GlobalParse(configRoles));
 		ProtocolManager protocolManager = ProtocolLibrary.getProtocolManager();
 	}
 
@@ -76,14 +81,14 @@ public class App extends JavaPlugin {
 					case "start":
 						List<Player> players = new ArrayList<>(Bukkit.getOnlinePlayers());
 						List<Location> spawnList = (List<Location>) getConfig().getList("spawns");
-						List<LGRole> roles = LGRole.getRoles();
+						List<RolesConfig> roles = RolesConfig.getRoles();
 						if (spawnList.size() < players.size()) {
 							sender.sendMessage("Pas assez de position pour le nombre de joueurs !");
 							return true;
 						}
 
-						if (roles.size() < players.size()) {
-							sender.sendMessage("Pas assez de roles pour le nombre de joueurs !");
+						if (roles.size() != players.size()) {
+							sender.sendMessage("Pas assez de joueurs pour le nombre de rôles ou inversement !");
 							return true;
 						}
 
@@ -98,7 +103,7 @@ public class App extends JavaPlugin {
 					case "reloadConfig":
 						break;
 					case "roles":
-						List<LGRole> displayRoles = LGRole.getRoles();
+						List<RolesConfig> displayRoles = RolesConfig.getRoles();
 						if (args.length > 1) {
 							switch (args[1]) {
 								case "set":
@@ -106,15 +111,15 @@ public class App extends JavaPlugin {
 										sender.sendMessage("Liste des rôles disponibles :");
 										sender.sendMessage(
 												String.format("%s", Utils.customJoin('\n',
-														new ArrayList<String>(LGRole.GetRolesNames()))));
+														new ArrayList<String>(RolesConfig.GetRolesNames()))));
 									} else {
 										if (args.length == 3) {
 											sender.sendMessage("Envoi un chiffre tu paieras pas plus cher le 100");
 										} else {
-											if (LGRole.GetRolesNames().contains(args[2])) {
+											if (RolesConfig.GetRolesNames().contains(args[2])) {
 												try {
 													Integer occurency = Integer.parseInt(args[3]);
-													LGRole.GetRoleByName(args[2]).setOccurency(occurency);
+													RolesConfig.GetRoleByName(args[2]).setCount(occurency);
 												} catch (NumberFormatException e) {
 													sender.sendMessage("Envoi un chiffre frérot tu foooooorces...");
 												}
@@ -125,18 +130,18 @@ public class App extends JavaPlugin {
 									}
 									break;
 								case "reset":
-									config.set("roles", LGRole.InitRoles());
+									config.set("roles", RolesConfig.GetDefaultConfig());
 									saveConfig();
 									sender.sendMessage("Les rôles sont remis à zéro :)");
 									break;
 							}
 						} else {
 							ArrayList<String> displayRolesName = new ArrayList<String>();
-							ListIterator<LGRole> roleIterator = displayRoles.listIterator();
+							ListIterator<RolesConfig> roleIterator = RolesConfig.getRoles().listIterator();
 							while (roleIterator.hasNext()) {
 								displayRolesName.add(roleIterator.next().Definition());
 							}
-							sender.sendMessage("Liste des rôles disponibles :");
+							sender.sendMessage("Liste des rôles pour la partie :");
 							sender.sendMessage(String.format("%s", Utils.customJoin('\n', displayRolesName)));
 						}
 						break;
@@ -179,12 +184,12 @@ public class App extends JavaPlugin {
 				if (args.length == 3) {
 					switch (args[1]) {
 						case "set":
-							commands = LGRole.GetRolesNames();
+							commands = RolesConfig.GetRolesNames();
 							break;
 					}
 				}
 				if (args.length == 4 && args[1].equals("set")) {
-					if (LGRole.GetRolesNames().contains(args[2])) {
+					if (RolesConfig.GetRolesNames().contains(args[2])) {
 						commands = new ArrayList<>((Arrays.asList("1")));
 					}
 				}
