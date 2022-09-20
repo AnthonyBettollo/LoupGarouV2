@@ -18,7 +18,6 @@ import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
 
 import loupgarou.classes.Game;
-import loupgarou.classes.roles.LGRole;
 import loupgarou.classes.roles.RolesConfig;
 import loupgarou.classes.utils.SpawnHandler;
 import loupgarou.classes.utils.Utils;
@@ -35,8 +34,8 @@ public class App extends JavaPlugin {
 	public void onEnable() {
 		instance = this;
 		getLogger().info("Wesh on load le LG trkl le couz!");
+		FileConfiguration config = getConfig();
 		if (!new File(getDataFolder(), "config.yml").exists()) {// Créer la config
-			FileConfiguration config = getConfig();
 			config.set("spawns", new ArrayList<List<Location>>());
 			config.set("roles", RolesConfig.GetDefaultConfig());
 			// for(String role : roles.keySet())//Nombre de participant pour chaque rôle
@@ -44,6 +43,7 @@ public class App extends JavaPlugin {
 
 			saveConfig();
 		}
+		RolesConfig.setRoles(RolesConfig.parseConfig((List<String>) getConfig().getList("roles")));
 		ProtocolManager protocolManager = ProtocolLibrary.getProtocolManager();
 	}
 
@@ -103,7 +103,6 @@ public class App extends JavaPlugin {
 					case "reloadConfig":
 						break;
 					case "roles":
-						List<RolesConfig> displayRoles = RolesConfig.getRoles();
 						if (args.length > 1) {
 							switch (args[1]) {
 								case "set":
