@@ -66,6 +66,22 @@ public class RolesConfig {
         return roleByName;
     }
 
+    public static void UpdateRole(String roleName,Integer count){
+        Integer index = 0;
+        RolesConfig updateRole = null;
+        for(RolesConfig role : RolesConfig.roles)
+        {
+            if(role.name.equals(roleName))
+            {
+                updateRole = role;
+                index = RolesConfig.roles.indexOf(role);
+                break;
+            }
+        }
+        updateRole.setCount(count);
+        RolesConfig.roles.set(index, updateRole);
+    }
+
     public static List<RolesConfig> parseConfig(List<String> roles) {
         List<RolesConfig> parsedRoles = new ArrayList<RolesConfig>();
         Iterator<String> iterator = roles.iterator();
@@ -82,14 +98,14 @@ public class RolesConfig {
         return parsedRoles;
     }
 
-    public static void saveConfig() {
-        FileConfiguration config = App.getInstance().getConfig();
+    public static List<String> getConfig()
+    {
         List<String> saveRoles = new ArrayList<String>();
         ListIterator<RolesConfig> roleIterator = RolesConfig.roles.listIterator();
         while (roleIterator.hasNext()) {
             saveRoles.add(roleIterator.next().toString());
         }
-        config.set("roles", saveRoles);
+        return saveRoles;
     }
 
     public String Definition()

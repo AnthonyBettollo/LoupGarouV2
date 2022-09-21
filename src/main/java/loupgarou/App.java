@@ -38,8 +38,6 @@ public class App extends JavaPlugin {
 		if (!new File(getDataFolder(), "config.yml").exists()) {// Créer la config
 			config.set("spawns", new ArrayList<List<Location>>());
 			config.set("roles", RolesConfig.GetDefaultConfig());
-			// for(String role : roles.keySet())//Nombre de participant pour chaque rôle
-			// config.set("role."+role, 1);
 
 			saveConfig();
 		}
@@ -117,8 +115,9 @@ public class App extends JavaPlugin {
 										} else {
 											if (RolesConfig.GetRolesNames().contains(args[2])) {
 												try {
-													Integer occurency = Integer.parseInt(args[3]);
-													RolesConfig.GetRoleByName(args[2]).setCount(occurency);
+													Integer count = Integer.parseInt(args[3]);
+													RolesConfig.UpdateRole(args[2],count);
+													sender.sendMessage("Modificiation enregistré !");
 												} catch (NumberFormatException e) {
 													sender.sendMessage("Envoi un chiffre frérot tu foooooorces...");
 												}
@@ -204,6 +203,9 @@ public class App extends JavaPlugin {
 	@Override
 	public void onDisable() {
 		getLogger().info("Ciao le sanch");
+		FileConfiguration config = getConfig();
+		config.set("roles", RolesConfig.getConfig());
+		saveConfig();
 		ProtocolLibrary.getProtocolManager().removePacketListeners(this);
 	}
 }
