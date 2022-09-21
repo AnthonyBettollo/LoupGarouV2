@@ -6,16 +6,14 @@ import java.util.List;
 import java.util.ListIterator;
 
 import org.bukkit.Bukkit;
-import org.bukkit.configuration.file.FileConfiguration;
 
 import lombok.Getter;
 import lombok.Setter;
-import loupgarou.App;
 
 public class RolesConfig {
     @Getter
     private String name;
-    @Setter
+    @Getter @Setter
     private Integer count;
     @Getter
     @Setter

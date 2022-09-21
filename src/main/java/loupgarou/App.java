@@ -8,24 +8,30 @@ import java.util.ListIterator;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Sound;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
+import com.comphenix.protocol.events.ListenerPriority;
+import com.comphenix.protocol.events.PacketAdapter;
+import com.comphenix.protocol.events.PacketEvent;
 
 import loupgarou.classes.Game;
 import loupgarou.classes.roles.RolesConfig;
 import loupgarou.classes.utils.SpawnHandler;
 import loupgarou.classes.utils.Utils;
+import loupgarou.listeners.CancelListener;
 
 public class App extends JavaPlugin {
 	private static App instance;
-	public static App getInstance()
-	{
+
+	public static App getInstance() {
 		return instance;
 	}
 
@@ -43,6 +49,29 @@ public class App extends JavaPlugin {
 		}
 		RolesConfig.setRoles(RolesConfig.parseConfig((List<String>) getConfig().getList("roles")));
 		ProtocolManager protocolManager = ProtocolLibrary.getProtocolManager();
+
+		Bukkit.getPluginManager().registerEvents(new CancelListener(), this);
+
+		protocolManager.addPacketListener(
+				new PacketAdapter(this, ListenerPriority.NORMAL, PacketType.Play.Server.UPDATE_HEALTH) {
+					@Override
+					public void onPacketSending(PacketEvent event) {
+						for (Player player : Bukkit.getOnlinePlayers()) {
+							player.setFoodLevel(20);
+						}
+					}
+				});
+
+		protocolManager.addPacketListener(
+				new PacketAdapter(this, ListenerPriority.NORMAL, PacketType.Play.Server.NAMED_SOUND_EFFECT) {
+					@Override
+					public void onPacketSending(PacketEvent event) {
+						if (event.getPacket().getSoundEffects().read(0).equals(Sound.ENTITY_PLAYER_ATTACK_NODAMAGE)) {
+							event.setCancelled(true);
+
+						}
+					}
+				});
 	}
 
 	@SuppressWarnings("unchecked")
@@ -80,17 +109,21 @@ public class App extends JavaPlugin {
 						List<Player> players = new ArrayList<>(Bukkit.getOnlinePlayers());
 						List<Location> spawnList = (List<Location>) getConfig().getList("spawns");
 						List<RolesConfig> roles = RolesConfig.getRoles();
+						Integer countRoles = 0;
+						for (RolesConfig role : roles) {
+							countRoles += role.getCount();
+						}
 						if (spawnList.size() < players.size()) {
 							sender.sendMessage("Pas assez de position pour le nombre de joueurs !");
 							return true;
 						}
 
-						if (roles.size() != players.size()) {
+						if (countRoles != players.size()) {
 							sender.sendMessage("Pas assez de joueurs pour le nombre de rôles ou inversement !");
 							return true;
 						}
 
-						new Game().start(players, spawnList, roles);
+						Game.start(players, spawnList, roles);
 						break;
 					case "end":
 						break;
@@ -116,7 +149,7 @@ public class App extends JavaPlugin {
 											if (RolesConfig.GetRolesNames().contains(args[2])) {
 												try {
 													Integer count = Integer.parseInt(args[3]);
-													RolesConfig.UpdateRole(args[2],count);
+													RolesConfig.UpdateRole(args[2], count);
 													sender.sendMessage("Modificiation enregistré !");
 												} catch (NumberFormatException e) {
 													sender.sendMessage("Envoi un chiffre frérot tu foooooorces...");

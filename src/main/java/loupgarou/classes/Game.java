@@ -13,19 +13,19 @@ import loupgarou.classes.roles.RolesConfig;
 
 public class Game {
     @Getter
-    private ArrayList<LGPlayer> lgPlayers = new ArrayList<>();
+    private static ArrayList<LGPlayer> lgPlayers = new ArrayList<>();
 
     @Getter
-    private ArrayList<LGRole> roles = new ArrayList<>();
+    private static ArrayList<LGRole> roles = new ArrayList<>();
 
     @Getter
-    private boolean started;
+    private static boolean started;
     @Getter
-    private int night = 0;
+    private static int night = 0;
     @Getter
-    private boolean day;
+    private static boolean day;
 
-    public void start(List<Player> players, List<Location> spawnList, List<RolesConfig> roles) {
+    public static void start(List<Player> players, List<Location> spawnList, List<RolesConfig> roles) {
         Collections.shuffle(roles);
         int indexRole = 0;
         for (Player player : players) {
@@ -33,6 +33,6 @@ public class Game {
             player.teleport(spawnList.get(indexRole));
             indexRole++;
         }
-        this.started = true;
+        started = true;
     }
 }
