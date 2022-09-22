@@ -126,6 +126,7 @@ public class App extends JavaPlugin {
 						Game.start(players, spawnList, roles);
 						break;
 					case "end":
+						Game.stop();
 						break;
 					case "nextNight":
 						break;
