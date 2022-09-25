@@ -1,5 +1,6 @@
 package loupgarou.listeners;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -69,21 +70,24 @@ public class CancelListener implements Listener {
 
 	@EventHandler
 	public void onClick(PlayerAnimationEvent e) {
-		if(e.getAnimationType() == PlayerAnimationType.ARM_SWING)
-		{
+		if (e.getAnimationType() == PlayerAnimationType.ARM_SWING && Game.isStarted()) {
+			Bukkit.getLogger().info("ClickHandler");
 			LGPlayer source = Game.getLgPlayer(e.getPlayer());
 			Location loc = e.getPlayer().getLocation();
-			if(loc.getPitch() > 60)
+			e.setCancelled(true);
+			if (loc.getPitch() > 60) {
 				source.vote(source);
-			for(int i = 0;i<50;i++) {
-				loc.add(loc.getDirection());
-				for(LGPlayer player : Game.getInGame()) {
-					if((!player.isDead()) && Utils.distanceSquaredXZ(loc, player.getPlayer().getLocation()) < 0.35 && Math.abs(loc.getY()-player.getPlayer().getLocation().getY()) < 2) {
-						source.vote(player);
+			} else {
+				for (int i = 0; i < 50; i++) {
+					loc.add(loc.getDirection());
+					for (LGPlayer player : Game.getInGame()) {
+						if ((!player.isDead()) && Utils.distanceSquaredXZ(loc, player.getPlayer().getLocation()) < 0.35
+								&& Math.abs(loc.getY() - player.getPlayer().getLocation().getY()) < 2) {
+							source.vote(player);
+						}
 					}
 				}
 			}
 		}
-			
 	}
 }

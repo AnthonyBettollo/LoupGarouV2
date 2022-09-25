@@ -1,5 +1,6 @@
 package loupgarou.classes;
 
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -24,6 +25,8 @@ public class LGPlayer {
     @Getter
     @Setter
     private boolean hasVoted = false;
+    @Getter @Setter
+    private LGPlayer votedPlayer;
     @Getter
     @Setter
     private Integer vote = 0;
@@ -40,11 +43,20 @@ public class LGPlayer {
         this.player.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 20, 2, false, false));
     }
 
-    public void vote(LGPlayer votedPlayer) {
+    public void vote(LGPlayer newVotedPlayer) {
         if (allowVote) {
-            votedPlayer.setVote(votedPlayer.getVote() + 1);
-            this.hasVoted = true;
-            this.getPlayer().sendMessage(String.format("Tu vote pour %s", votedPlayer.getName()));
+            Bukkit.getLogger().info(newVotedPlayer.getName());
+            if(this.votedPlayer != null)
+            {
+                this.votedPlayer.setVote(this.votedPlayer.getVote()-1);
+            }
+            if(this.votedPlayer == null || !this.votedPlayer.equals(newVotedPlayer))
+            {
+                newVotedPlayer.setVote(newVotedPlayer.getVote() + 1);
+                this.setVotedPlayer(votedPlayer);
+                this.hasVoted = true;
+                this.getPlayer().sendMessage(String.format("Tu vote pour %s", newVotedPlayer.equals(this) ? "toi-même" : newVotedPlayer.getName()));
+            }
         }
     }
 

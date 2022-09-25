@@ -16,6 +16,7 @@ import lombok.Setter;
 import loupgarou.App;
 import loupgarou.classes.roles.LGRole;
 import loupgarou.classes.roles.RolesConfig;
+import loupgarou.classes.utils.SortLGPlayerByVote;
 
 public class Game {
     @Getter
@@ -58,7 +59,7 @@ public class Game {
             Game.broadcastMessage(
                     "Bienvenue dans cette game mes petits fratello\nPour commencer on on va choisir un maire, un leader, un boss bref celui qu'on écoute (donc pas loyo)\nVous avez 30 secondes pour faire un choix !");
             Game.vote(30, () -> {
-
+                Game.setMayor();
             });
         });
 
@@ -80,20 +81,34 @@ public class Game {
             lgp.getPlayer().sendMessage("\n");
     }
 
-    public static LGPlayer getLgPlayer(Player player)
-    {
+    public static LGPlayer getLgPlayer(Player player) {
         LGPlayer lgPlayer = null;
 
-        for(LGPlayer lPlayer : Game.getInGame())
-        {
-            if(lPlayer.getPlayer().equals(player))
-            {
+        for (LGPlayer lPlayer : Game.getInGame()) {
+            if (lPlayer.getPlayer().equals(player)) {
                 lgPlayer = lPlayer;
                 break;
             }
         }
 
         return lgPlayer;
+    }
+
+    public static void setMayor() {
+        List<LGPlayer> mayorList = new ArrayList<LGPlayer>();
+        List<LGPlayer> playersList = Game.getInGame();
+        Collections.sort(playersList, new SortLGPlayerByVote());
+        Integer maxVote = playersList.get(0).getVote();
+
+        for (LGPlayer player : playersList) {
+            if (player.getVote() == maxVote) {
+                mayorList.add(player);
+            }
+        }
+
+        Collections.shuffle(mayorList);
+        Game.mayor = mayorList.get(0);
+        Game.broadcastMessage(String.format("%s est élu, bonne chance à lui Inch", Game.mayor.getName()));
     }
 
     public static interface TextGenerator {
@@ -141,15 +156,20 @@ public class Game {
     public static void vote(int seconds, Runnable callback) {
         Game.cancelWait();
         Game.setWaitTicks(seconds * 20);
+        Game.GlobalSetAllowVote(true);
         waitTask = new BukkitRunnable() {
             @Override
             public void run() {
                 for (LGPlayer player : getInGame()) {
                     player.getPlayer().setLevel((short) (Math.floorDiv(waitTicks, 20) + 1));
                 }
-                if (waitTicks == 0 || Game.allVoted() == Game.getInGame().size()) {
+                if (Game.allVoted() == getInGame().size() && waitTicks > (10*20)) {
+                    waitTicks = (10*20);
+                }
+                if (waitTicks == 0) {
                     waitTask = null;
                     cancel();
+                    Game.GlobalSetAllowVote(false);
                     callback.run();
                 }
                 waitTicks--;
@@ -165,5 +185,11 @@ public class Game {
         }
         lgPlayers.clear();
         started = false;
+    }
+
+    public static void GlobalSetAllowVote(boolean value) {
+        for (LGPlayer lgPlayer : Game.getInGame()) {
+            lgPlayer.setAllowVote(value);
+        }
     }
 }
