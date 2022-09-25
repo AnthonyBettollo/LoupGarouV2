@@ -2,6 +2,8 @@ package loupgarou.classes.utils;
 
 import java.util.ArrayList;
 
+import org.bukkit.Location;
+
 public class Utils {
     public static boolean isInteger(String s) {
         try {
@@ -21,4 +23,8 @@ public class Utils {
         }
         return joinedString.substring(0,joinedString.length()-1);
     }
+
+    public static double distanceSquaredXZ(Location from, Location to) {
+		return Math.pow(from.getX()-to.getX(), 2)+Math.pow(from.getZ()-to.getZ(), 2);
+	}
 }
