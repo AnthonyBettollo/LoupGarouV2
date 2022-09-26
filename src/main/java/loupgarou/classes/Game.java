@@ -1,5 +1,6 @@
 package loupgarou.classes;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -10,6 +11,11 @@ import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
+
+import com.comphenix.protocol.PacketType;
+import com.comphenix.protocol.ProtocolLibrary;
+import com.comphenix.protocol.ProtocolManager;
+import com.comphenix.protocol.events.PacketContainer;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -81,6 +87,19 @@ public class Game {
             lgp.getPlayer().sendMessage("\n");
     }
 
+    public static void broadcastPacket(){
+        ProtocolManager manager = ProtocolLibrary.getProtocolManager();
+        try {
+            for (LGPlayer lgp : Game.lgPlayers)
+            {
+                manager.sendServerPacket(lgp.getPlayer(), new PacketContainer(PacketType.Play.Server.PLAYER_INFO));
+            }
+        } catch (InvocationTargetException e) {
+            Bukkit.getLogger().warning(String.format("Le joueur %s est déconnecté", e.getMessage()));
+        }
+        
+    }
+
     public static LGPlayer getLgPlayer(Player player) {
         LGPlayer lgPlayer = null;
 
@@ -109,6 +128,7 @@ public class Game {
         Collections.shuffle(mayorList);
         Game.mayor = mayorList.get(0);
         Game.broadcastMessage(String.format("%s est élu, bonne chance à lui Inch", Game.mayor.getName()));
+        Game.broadcastPacket();
     }
 
     public static interface TextGenerator {

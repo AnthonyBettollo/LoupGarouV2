@@ -72,6 +72,55 @@ public class App extends JavaPlugin {
 						}
 					}
 				});
+
+		//TODO Gérer l'event de mise à jour du skin du maire
+		// protocolManager.addPacketListener(
+		// 		new PacketAdapter(this, ListenerPriority.NORMAL, PacketType.Play.Server.PLAYER_INFO) {
+		// 			@Override
+		// 			public void onPacketSending(PacketEvent event) {
+		// 				Bukkit.getLogger().info("Packet sending");
+		// 				Player currentPlayer = event.getPlayer();
+		// 				LGPlayer player = Game.getLgPlayer(currentPlayer);
+		// 				ArrayList<PlayerInfoData> datas = new ArrayList<PlayerInfoData>();
+		// 				event.getPacket().getModifier().writeDefaults();
+		// 				for (PlayerInfoData data : event.getPacket().getPlayerInfoDataLists().read(0)) {
+		// 					if (Game.isStarted() && Game.getMayor() != null && Game.getMayor().equals(player)) {
+		// 						Bukkit.getLogger().info("Update mayor skin");
+		// 						WrappedChatComponent displayName = data.getDisplayName();
+		// 						data.getProfile().getProperties().removeAll("textures");
+		// 						data.getProfile().getProperties().put("textures", LGSkin.MAYOR.getProperty());
+		// 						datas.add(new PlayerInfoData(WrappedGameProfile.fromPlayer(currentPlayer),
+		// 								data.getLatency(), NativeGameMode.SURVIVAL, displayName));
+
+		// 						event.getPacket().getPlayerInfoDataLists().write(0, datas);
+		// 						event.setPacket(event.getPacket());
+		// 						PacketContainer container = new PacketContainer(PacketType.Play.Server.RESPAWN,currentPlayer);
+								
+		// 						container.getPlayerInfoDataLists().writeDefaults();
+		// 						container.getPlayerInfoDataLists().write(0, datas);
+		// 						try {
+		// 							protocolManager.sendServerPacket(currentPlayer, container);
+		// 							currentPlayer.teleport(currentPlayer.getLocation());
+		// 							float speed = currentPlayer.getWalkSpeed();
+		// 							currentPlayer.setWalkSpeed(0.2f);
+		// 							new BukkitRunnable() {
+
+		// 								@Override
+		// 								public void run() {
+		// 									currentPlayer.updateInventory();
+		// 									currentPlayer.setWalkSpeed(speed);
+		// 								}
+		// 							}.runTaskLater(App.getInstance(), 5);
+		// 						} catch (Exception e) {
+		// 							Bukkit.getLogger()
+		// 									.warning(String.format("Le joueur %s est déconnecté", e.getMessage()));
+		// 						}
+		// 					} else {
+		// 						datas.add(data);
+		// 					}
+		// 				}
+		// 			}
+		// 		});
 	}
 
 	@SuppressWarnings("unchecked")
