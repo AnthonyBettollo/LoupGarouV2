@@ -1,17 +1,16 @@
 package loupgarou.listeners;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntitySpawnEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
-import org.bukkit.event.player.PlayerAnimationEvent;
-import org.bukkit.event.player.PlayerAnimationType;
 import org.bukkit.event.player.PlayerDropItemEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.weather.WeatherChangeEvent;
@@ -69,9 +68,8 @@ public class CancelListener implements Listener {
 	}
 
 	@EventHandler
-	public void onClick(PlayerAnimationEvent e) {
-		if (e.getAnimationType() == PlayerAnimationType.ARM_SWING && Game.isStarted()) {
-			Bukkit.getLogger().info("ClickHandler");
+	public void onClick(PlayerInteractEvent e) {
+		if (e.getAction() == Action.LEFT_CLICK_AIR || e.getAction() == Action.LEFT_CLICK_BLOCK && Game.isStarted()) {
 			LGPlayer source = Game.getLgPlayer(e.getPlayer());
 			Location loc = e.getPlayer().getLocation();
 			e.setCancelled(true);

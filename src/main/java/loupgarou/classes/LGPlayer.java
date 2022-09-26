@@ -1,6 +1,5 @@
 package loupgarou.classes;
 
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -45,15 +44,14 @@ public class LGPlayer {
 
     public void vote(LGPlayer newVotedPlayer) {
         if (allowVote) {
-            Bukkit.getLogger().info(newVotedPlayer.getName());
-            if(this.votedPlayer != null)
+            if(this.votedPlayer == null || !this.votedPlayer.getName().equals(newVotedPlayer.getName()))
             {
-                this.votedPlayer.setVote(this.votedPlayer.getVote()-1);
-            }
-            if(this.votedPlayer == null || !this.votedPlayer.equals(newVotedPlayer))
-            {
+                if(this.votedPlayer != null)
+                {
+                    this.votedPlayer.setVote(this.votedPlayer.getVote()-1);
+                }
                 newVotedPlayer.setVote(newVotedPlayer.getVote() + 1);
-                this.setVotedPlayer(votedPlayer);
+                this.setVotedPlayer(newVotedPlayer);
                 this.hasVoted = true;
                 this.getPlayer().sendMessage(String.format("Tu vote pour %s", newVotedPlayer.equals(this) ? "toi-même" : newVotedPlayer.getName()));
             }

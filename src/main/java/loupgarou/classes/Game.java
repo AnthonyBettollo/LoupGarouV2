@@ -183,12 +183,16 @@ public class Game {
         for (Player player : Bukkit.getOnlinePlayers()) {
             player.removePotionEffect(PotionEffectType.BLINDNESS);
         }
+        GlobalSetAllowVote(false);
+        inGame.clear();
         lgPlayers.clear();
+        mayor = null;
         started = false;
     }
 
     public static void GlobalSetAllowVote(boolean value) {
         for (LGPlayer lgPlayer : Game.getInGame()) {
+            Bukkit.getLogger().info(String.format("%s : %s votes", lgPlayer.getName(),lgPlayer.getVote()));
             lgPlayer.setAllowVote(value);
         }
     }
