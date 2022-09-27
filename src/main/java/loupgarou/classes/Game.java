@@ -92,8 +92,13 @@ public class Game {
         try {
             for (LGPlayer lgp : Game.lgPlayers)
             {
+                Bukkit.getLogger().info(String.format("Sending PLAYER_INFO to %s", lgp.getName()));
                 manager.sendServerPacket(lgp.getPlayer(), new PacketContainer(PacketType.Play.Server.PLAYER_INFO));
+                lgp.getPlayer().hidePlayer(App.getInstance(),Game.mayor.getPlayer());
+                lgp.getPlayer().showPlayer(App.getInstance(),Game.mayor.getPlayer());
             }
+
+            
         } catch (InvocationTargetException e) {
             Bukkit.getLogger().warning(String.format("Le joueur %s est déconnecté", e.getMessage()));
         }
