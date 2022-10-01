@@ -66,7 +66,7 @@ public class RolesConfig {
 
     public static void UpdateRole(String roleName,Integer count){
         Integer index = 0;
-        RolesConfig updateRole = null;
+        RolesConfig updateRole = new RolesConfig();
         for(RolesConfig role : RolesConfig.roles)
         {
             if(role.name.equals(roleName))

@@ -73,91 +73,48 @@ public class App extends JavaPlugin {
 					}
 				});
 
-		// protocolManager.addPacketListener(new PacketAdapter(this, PacketType.Play.Server.PLAYER_INFO) {
-		// 	@Override
-		// 	public void onPacketSending(PacketEvent event) {
-		// 		Bukkit.getLogger().info("PLAYER INFO SENDING");
-		// 		WrapperPlayServerPlayerInfo wrapper = new WrapperPlayServerPlayerInfo(event.getPacket());
-		// 		List<PlayerInfoData> playerInfoDataList = wrapper.getData();
-		// 		if (wrapper.getAction() != PlayerInfoAction.ADD_PLAYER) {
-		// 			return;
-		// 		}
+		protocolManager.addPacketListener(new PacketAdapter(this, PacketType.Play.Server.PLAYER_INFO) {
+			@Override
+			public void onPacketSending(PacketEvent event) {
+				Bukkit.getLogger().info("PLAYER INFO SENDING");
+				// WrapperPlayServerPlayerInfo wrapper = new WrapperPlayServerPlayerInfo(event.getPacket());
+				// List<PlayerInfoData> playerInfoDataList = wrapper.getData();
+				// List<PlayerInfoData> newPlayerInfoDataList = new ArrayList<PlayerInfoData>();
 
-		// 		List<PlayerInfoData> newPlayerInfoDataList = Lists.newArrayList();
+				// Player currentPlayer = event.getPlayer();
 
-		// 		for (PlayerInfoData playerInfoData : playerInfoDataList) {
-		// 			Player player = Bukkit.getPlayer(playerInfoData.getProfile().getName());
-		// 			if (playerInfoData == null || playerInfoData.getProfile() == null
-		// 					|| (player == null || !player.isOnline())) {
-		// 				newPlayerInfoDataList.add(playerInfoData);
-		// 				continue;
-		// 			}
+				// if (wrapper.getAction() != PlayerInfoAction.ADD_PLAYER  || !Game.isStarted()) {
+                //     return;
+                // }
 
-		// 			WrappedGameProfile profile = playerInfoData.getProfile();
-		// 			profile.getProperties().removeAll("textures");
-		// 			profile.getProperties().put("textures", LGSkin.MAYOR.getProperty());
-		// 			PlayerInfoData newPlayerInfoData = new PlayerInfoData(profile, playerInfoData.getLatency(),
-		// 					playerInfoData.getGameMode(), playerInfoData.getDisplayName());
-		// 			newPlayerInfoDataList.add(newPlayerInfoData);
-		// 		}
+				// for (PlayerInfoData playerInfoData : playerInfoDataList) {
 
-		// 		wrapper.setData(newPlayerInfoDataList);
-		// 	}
-		// });
+				// 	if (playerInfoData == null || playerInfoData.getProfile() == null) {
+                //         newPlayerInfoDataList.add(playerInfoData);
+                //         continue;
+                //     }
 
-		// TODO Gérer l'event de mise à jour du skin du maire
-		// protocolManager.addPacketListener(
-		// new PacketAdapter(this, ListenerPriority.NORMAL,
-		// PacketType.Play.Server.PLAYER_INFO) {
-		// @Override
-		// public void onPacketSending(PacketEvent event) {
-		// Bukkit.getLogger().info("Packet sending");
-		// Player currentPlayer = event.getPlayer();
-		// LGPlayer player = Game.getLgPlayer(currentPlayer);
-		// ArrayList<PlayerInfoData> datas = new ArrayList<PlayerInfoData>();
-		// event.getPacket().getModifier().writeDefaults();
-		// for (PlayerInfoData data :
-		// event.getPacket().getPlayerInfoDataLists().read(0)) {
-		// if (Game.isStarted() && Game.getMayor() != null &&
-		// Game.getMayor().equals(player)) {
-		// Bukkit.getLogger().info("Update mayor skin");
-		// WrappedChatComponent displayName = data.getDisplayName();
-		// data.getProfile().getProperties().removeAll("textures");
-		// data.getProfile().getProperties().put("textures",
-		// LGSkin.MAYOR.getProperty());
-		// datas.add(new PlayerInfoData(WrappedGameProfile.fromPlayer(currentPlayer),
-		// data.getLatency(), NativeGameMode.SURVIVAL, displayName));
+				// 	if(playerInfoData.getProfile().getName().equals(Game.getMayor().getName()))
+				// 	{
+				// 		Bukkit.getLogger().info("ON MAJ LE SKIN DU MAIRE");
+				// 		WrappedGameProfile profile = playerInfoData.getProfile();
+				// 		profile.getProperties().put("textures", LGSkin.MAYOR.getProperty());
+				// 		PlayerInfoData newPlayerInfoData = new PlayerInfoData(profile, playerInfoData.getLatency(), playerInfoData.getGameMode(), playerInfoData.getDisplayName());
+				// 		newPlayerInfoDataList.add(newPlayerInfoData);
+				// 	}
 
-		// event.getPacket().getPlayerInfoDataLists().write(0, datas);
-		// event.setPacket(event.getPacket());
-		// PacketContainer container = new
-		// PacketContainer(PacketType.Play.Server.RESPAWN,currentPlayer);
-
-		// container.getPlayerInfoDataLists().writeDefaults();
-		// container.getPlayerInfoDataLists().write(0, datas);
-		// try {
-		// protocolManager.sendServerPacket(currentPlayer, container);
-		// currentPlayer.teleport(currentPlayer.getLocation());
-		// float speed = currentPlayer.getWalkSpeed();
-		// currentPlayer.setWalkSpeed(0.2f);
-		// new BukkitRunnable() {
-
-		// @Override
-		// public void run() {
-		// currentPlayer.updateInventory();
-		// currentPlayer.setWalkSpeed(speed);
-		// }
-		// }.runTaskLater(App.getInstance(), 5);
-		// } catch (Exception e) {
-		// Bukkit.getLogger()
-		// .warning(String.format("Le joueur %s est déconnecté", e.getMessage()));
-		// }
-		// } else {
-		// datas.add(data);
-		// }
-		// }
-		// }
-		// });
+				// 	Bukkit.getLogger().info(String.format("CHECK %s INFOS", playerInfoData.getProfile().getName()));
+				// 	WrappedGameProfile profile = playerInfoData.getProfile();
+				// 	profile.getProperties().removeAll("textures");
+				// 	profile.getProperties().put("textures", LGSkin.MAYOR.getProperty());
+				// 	PlayerInfoData newPlayerInfoData = new PlayerInfoData(profile, playerInfoData.getLatency(),
+				// 			playerInfoData.getGameMode(), playerInfoData.getDisplayName());
+				// 	newPlayerInfoDataList.add(newPlayerInfoData);
+				// 	break;
+				// }
+				// wrapper.setData(newPlayerInfoDataList);
+			}
+		});
 	}
 
 	@SuppressWarnings("unchecked")

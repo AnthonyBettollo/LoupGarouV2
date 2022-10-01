@@ -22,9 +22,12 @@ public abstract class LGRole implements Listener {
     private String codeCouleur;
     @Setter
     private int occurency;
+    @Getter @Setter
+    private int nightOrder;
 
     protected void onNightTurnTimeout(LGPlayer player) {}
-	protected void onNightTurn(LGPlayer player, Runnable callback) {}
+    
+	public void onNightTurn(LGPlayer player) {}
 
     public LGRole() {
 

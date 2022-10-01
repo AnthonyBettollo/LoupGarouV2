@@ -8,6 +8,7 @@ import java.util.List;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
+import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
@@ -23,6 +24,7 @@ import loupgarou.App;
 import loupgarou.classes.roles.LGRole;
 import loupgarou.classes.roles.RolesConfig;
 import loupgarou.classes.utils.SortLGPlayerByVote;
+import loupgarou.classes.utils.SortLGRolesByNightOrder;
 
 public class Game {
     @Getter
@@ -60,16 +62,27 @@ public class Game {
             player.teleport(spawnList.get(indexRole));
             indexRole++;
         }
-
+        Collections.sort(getRoles(), new SortLGRolesByNightOrder());
         wait(5, () -> {
             Game.broadcastMessage(
                     "Bienvenue dans cette game mes petits fratello\nPour commencer on on va choisir un maire, un leader, un boss bref celui qu'on écoute (donc pas loyo)\nVous avez 30 secondes pour faire un choix !");
             Game.vote(30, () -> {
                 Game.setMayor();
+                Game.nextNight();
             });
         });
 
         started = true;
+    }
+
+    public static void nextNight()
+    {
+        Game.broadcastMessage("La nuit comment bonne chance les reufs (go kill Maelo)");
+        for(LGPlayer lgPlayer: getInGame())
+        {
+            lgPlayer.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS,6000,3));
+            lgPlayer.getRole().onNightTurn(lgPlayer);
+        }
     }
 
     public static void broadcastTitle(String title, String subTitle, Integer fadeIn, Integer stay, Integer fadeOut) {
@@ -94,11 +107,9 @@ public class Game {
             {
                 Bukkit.getLogger().info(String.format("Sending PLAYER_INFO to %s", lgp.getName()));
                 manager.sendServerPacket(lgp.getPlayer(), new PacketContainer(PacketType.Play.Server.PLAYER_INFO));
-                lgp.getPlayer().hidePlayer(App.getInstance(),Game.mayor.getPlayer());
-                lgp.getPlayer().showPlayer(App.getInstance(),Game.mayor.getPlayer());
+                lgp.updateSkin();
+                lgp.updateOwnSkin();
             }
-
-            
         } catch (InvocationTargetException e) {
             Bukkit.getLogger().warning(String.format("Le joueur %s est déconnecté", e.getMessage()));
         }
