@@ -70,7 +70,7 @@ public class CancelListener implements Listener {
 
 	@EventHandler
 	public void onClick(PlayerInteractEvent e) {
-		if (e.getAction() == Action.LEFT_CLICK_AIR || e.getAction() == Action.LEFT_CLICK_BLOCK && Game.isStarted()) {
+		if ((e.getAction() == Action.LEFT_CLICK_AIR || e.getAction() == Action.LEFT_CLICK_BLOCK) && Game.isStarted()) {
 			LGPlayer source = Game.getLgPlayer(e.getPlayer());
 			Bukkit.getLogger().info(source.getName());
 			Location loc = e.getPlayer().getLocation();

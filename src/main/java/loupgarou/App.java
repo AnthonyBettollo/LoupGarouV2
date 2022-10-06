@@ -134,8 +134,8 @@ public class App extends JavaPlugin {
 						Player currentPlayer = (Player) sender;
 						Location loc = currentPlayer.getLocation();
 						List<Location> spawns = (List<Location>) getConfig().getList("spawns");
-						spawns.add(new Location(Bukkit.getWorld("world"), (double) loc.getBlockX(), loc.getY(),
-								(double) loc.getBlockZ(), loc.getYaw(), loc.getPitch()));
+						spawns.add(new Location(Bukkit.getWorld("world"), (double) loc.getBlockX()+0.5, loc.getY(),
+								(double) loc.getBlockZ()+0.5, loc.getYaw(), loc.getPitch()));
 						saveConfig();
 						reloadConfig();
 						sender.sendMessage("La position a bien été ajoutée !");
@@ -152,9 +152,15 @@ public class App extends JavaPlugin {
 						List<Player> players = new ArrayList<>(Bukkit.getOnlinePlayers());
 						List<Location> spawnList = (List<Location>) getConfig().getList("spawns");
 						List<RolesConfig> roles = RolesConfig.getRoles();
+						List<RolesConfig> playableRoles = new ArrayList<>();
 						Integer countRoles = 0;
 						for (RolesConfig role : roles) {
-							countRoles += role.getCount();
+							if(role.getCount() != 0)
+							{
+								countRoles += role.getCount();
+								playableRoles.add(role);
+							}
+							
 						}
 						if (spawnList.size() < players.size()) {
 							sender.sendMessage("Pas assez de position pour le nombre de joueurs !");
@@ -166,7 +172,7 @@ public class App extends JavaPlugin {
 							return true;
 						}
 
-						Game.start(players, spawnList, roles);
+						Game.start(players, spawnList, playableRoles);
 						break;
 					case "end":
 						Game.stop();
@@ -194,7 +200,7 @@ public class App extends JavaPlugin {
 												try {
 													Integer count = Integer.parseInt(args[3]);
 													RolesConfig.UpdateRole(args[2], count);
-													sender.sendMessage("Modificiation enregistré !");
+													sender.sendMessage("Modification enregistré !");
 												} catch (NumberFormatException e) {
 													sender.sendMessage("Envoi un chiffre frérot tu foooooorces...");
 												}

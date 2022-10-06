@@ -7,6 +7,8 @@ import java.util.List;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Sound;
+import org.bukkit.SoundCategory;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -25,13 +27,15 @@ import loupgarou.classes.roles.LGRole;
 import loupgarou.classes.roles.RolesConfig;
 import loupgarou.classes.utils.SortLGPlayerByVote;
 import loupgarou.classes.utils.SortLGRolesByNightOrder;
+import loupgarou.classes.wrappers.WrapperPlayServerUpdateTime;
 
 public class Game {
     @Getter
     private static ArrayList<LGPlayer> lgPlayers = new ArrayList<>();
     @Getter
     private static ArrayList<LGPlayer> inGame = new ArrayList<>();
-
+    @Getter
+    private static ArrayList<LGPlayer> lgPlayersAlive = new ArrayList<>();
     @Getter
     private static LGPlayer mayor;
 
@@ -41,6 +45,9 @@ public class Game {
 
     @Getter
     private static ArrayList<LGRole> roles = new ArrayList<>();
+
+    @Getter
+    private static ArrayList<LGRole> rolesAlives = new ArrayList<>();
 
     @Getter
     private static boolean started;
@@ -57,18 +64,45 @@ public class Game {
         int indexRole = 0;
         for (Player player : players) {
             LGPlayer newPlayer = new LGPlayer(player, roles.get(indexRole));
+            getRoles().add(newPlayer.getRole());
             lgPlayers.add(newPlayer);
             inGame.add(newPlayer);
+            lgPlayersAlive.add(newPlayer);
             player.teleport(spawnList.get(indexRole));
             indexRole++;
         }
         Collections.sort(getRoles(), new SortLGRolesByNightOrder());
+        for(LGRole lgRole : getRoles())
+        {
+            rolesAlives.add(lgRole);
+        }
         wait(5, () -> {
+            WrapperPlayServerUpdateTime time = new WrapperPlayServerUpdateTime();
+                            time.setAgeOfTheWorld(0);
+                            time.setTimeOfDay((long)(6000));
             Game.broadcastMessage(
                     "Bienvenue dans cette game mes petits fratello\nPour commencer on on va choisir un maire, un leader, un boss bref celui qu'on écoute (donc pas loyo)\nVous avez 30 secondes pour faire un choix !");
             Game.vote(30, () -> {
                 Game.setMayor();
-                Game.nextNight();
+                new BukkitRunnable() {
+                    int timeoutLeft = 5*20;
+                    @Override
+                    public void run() {
+                        if(--timeoutLeft <= 20+20*2) {
+                            if(timeoutLeft == 20)
+                            {
+                                Game.nextNight();
+                                cancel();
+                            }
+                            WrapperPlayServerUpdateTime time = new WrapperPlayServerUpdateTime();
+                            time.setAgeOfTheWorld(0);
+                            time.setTimeOfDay((long)(18000-(timeoutLeft-20D)/(20*2D)*12000D));
+                            for(LGPlayer lgp : getInGame())
+                                time.sendPacket(lgp.getPlayer());
+                        }
+                    }
+                }.runTaskTimer(App.getInstance(), 1, 1);
+                
             });
         });
 
@@ -77,11 +111,57 @@ public class Game {
 
     public static void nextNight()
     {
-        Game.broadcastMessage("La nuit comment bonne chance les reufs (go kill Maelo)");
-        for(LGPlayer lgPlayer: getInGame())
+        night++;
+        Game.broadcastMessage("La nuit va commencer bonne chance les reufs (go kill Maelo)");
+        broadcastMessage("§9----------- §lNuit n°"+night+"§9 -----------");
+		broadcastMessage("§8§oLa nuit tombe sur le village...");
+		// for(LGPlayer player : getLgPlayersAlive())
+        // {
+        //     player.leaveChat();
+        // }
+		
+		for(LGPlayer lgPlayer : getInGame()) {
+            WrapperPlayServerUpdateTime time = new WrapperPlayServerUpdateTime();
+            time.setAgeOfTheWorld(0);
+            time.setTimeOfDay((long)(14500));
+            for(LGPlayer hideLGPlayer : getInGame()) {
+                if(hideLGPlayer == lgPlayer)
+                {
+                    continue;
+                }
+                lgPlayer.getPlayer().hidePlayer(App.getInstance(), hideLGPlayer.getPlayer());
+            }
+            lgPlayer.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS,6000,9));
+			lgPlayer.getPlayer().stopSound(Sound.MUSIC_DISC_MELLOHI);
+			lgPlayer.getPlayer().playSound(lgPlayer.getPlayer().getLocation(), Sound.ENTITY_SKELETON_DEATH, SoundCategory.AMBIENT, 50, 0);
+			lgPlayer.getPlayer().playSound(lgPlayer.getPlayer().getLocation(), Sound.MUSIC_DISC_MALL, SoundCategory.AMBIENT, 50, 0);
+		}
+
+        wait(5,() -> {
+            for(LGRole role: getRolesAlives())
+            {
+                Bukkit.getLogger().info(String.format("role : %s", role.getName()));
+                role.onNightTurn(getLgPlayersByRole(role.getName()));
+                // Game.NextDay();
+            }
+        });
+    }
+
+    public static void NextDay()
+    {
+        for(LGPlayer player : getInGame())
         {
-            lgPlayer.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS,6000,3));
-            lgPlayer.getRole().onNightTurn(lgPlayer);
+            for(LGPlayer showPlayer : getInGame())
+            {
+                player.getPlayer().showPlayer(App.getInstance(), showPlayer.getPlayer());
+                WrapperPlayServerUpdateTime time = new WrapperPlayServerUpdateTime();
+                time.setAgeOfTheWorld(0);
+                time.setTimeOfDay((long)(6000));
+            }
+            if(player.isDead())
+            {
+                Game.broadcastMessage(String.format("Cette nuit, %s est mort (comme une merde) RIP\nIl était %s%s !", player.getName(),player.getRole().getCodeCouleur(),player.getRole().getName()));
+            }
         }
     }
 
@@ -129,6 +209,21 @@ public class Game {
         return lgPlayer;
     }
 
+    public static List<LGPlayer> getLgPlayersByRole(String roleName)
+    {
+        List<LGPlayer> players = new ArrayList<LGPlayer>();
+
+        for(LGPlayer lgPlayer : getInGame())
+        {
+            if(lgPlayer.getRole().getName().equals(roleName))
+            {
+                players.add(lgPlayer);
+            }
+        }
+
+        return players;
+    }
+
     public static void setMayor() {
         List<LGPlayer> mayorList = new ArrayList<LGPlayer>();
         List<LGPlayer> playersList = Game.getInGame();
@@ -145,6 +240,26 @@ public class Game {
         Game.mayor = mayorList.get(0);
         Game.broadcastMessage(String.format("%s est élu, bonne chance à lui Inch", Game.mayor.getName()));
         Game.broadcastPacket();
+    }
+
+    public static void setKilledByWolf()
+    {
+        List<LGPlayer> killedList = new ArrayList<LGPlayer>();
+        List<LGPlayer> playersList = Game.getInGame();
+        Collections.sort(playersList, new SortLGPlayerByVote());
+        Integer maxVote = playersList.get(0).getVote();
+
+        for (LGPlayer player : playersList) {
+            if (player.getVote() == maxVote) {
+                killedList.add(player);
+            }
+        }
+
+        Collections.shuffle(killedList);
+
+        Bukkit.getLogger().info(String.format("Mort de %s", killedList.get(0).getName()));
+
+        killedList.get(0).setDead(true);
     }
 
     public static interface TextGenerator {
@@ -228,6 +343,9 @@ public class Game {
 
     public static void GlobalSetAllowVote(boolean value) {
         for (LGPlayer lgPlayer : Game.getInGame()) {
+            lgPlayer.setVotedPlayer(null);
+            lgPlayer.setHasVoted(false);
+            lgPlayer.setVote(0);
             Bukkit.getLogger().info(String.format("%s : %s votes", lgPlayer.getName(),lgPlayer.getVote()));
             lgPlayer.setAllowVote(value);
         }

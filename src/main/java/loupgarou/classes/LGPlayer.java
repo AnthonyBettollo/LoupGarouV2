@@ -30,7 +30,8 @@ public class LGPlayer {
     private LGRole role;
     @Getter
     private String name;
-    @Getter
+    @Getter 
+    @Setter
     private boolean dead;
     @Getter
     @Setter
@@ -54,7 +55,7 @@ public class LGPlayer {
         this.player.sendMessage(String.format("Tu es %s%s", this.role.getCodeCouleur(), this.role.getName()));
         // this.player.sendMessage(this.role.getShortDescription());
         this.player.sendMessage(this.role.getDescription());
-        this.player.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 20, 2, false, false));
+        this.player.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 20, 9, false, false));
     }
 
     public void vote(LGPlayer newVotedPlayer) {

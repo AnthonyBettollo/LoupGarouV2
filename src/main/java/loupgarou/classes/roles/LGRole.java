@@ -1,5 +1,7 @@
 package loupgarou.classes.roles;
 
+import java.util.List;
+
 import org.bukkit.event.Listener;
 
 import lombok.Getter;
@@ -24,10 +26,8 @@ public abstract class LGRole implements Listener {
     private int occurency;
     @Getter @Setter
     private int nightOrder;
-
-    protected void onNightTurnTimeout(LGPlayer player) {}
     
-	public void onNightTurn(LGPlayer player) {}
+	public void onNightTurn(List<LGPlayer> player) {}
 
     public LGRole() {
 

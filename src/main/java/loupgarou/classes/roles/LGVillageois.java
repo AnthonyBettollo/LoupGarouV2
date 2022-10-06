@@ -1,5 +1,7 @@
 package loupgarou.classes.roles;
 
+import java.util.List;
+
 import loupgarou.classes.LGPlayer;
 
 public class LGVillageois extends LGRole {
@@ -15,8 +17,8 @@ public class LGVillageois extends LGRole {
     }
 
     @Override
-    public void onNightTurn(LGPlayer player) {
-        super.onNightTurn(player);
+    public void onNightTurn(List<LGPlayer> players) {
+        super.onNightTurn(players);
     }
 
     @Override
