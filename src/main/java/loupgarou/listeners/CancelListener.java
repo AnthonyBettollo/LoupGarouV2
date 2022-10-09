@@ -10,6 +10,7 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntitySpawnEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
@@ -66,6 +67,14 @@ public class CancelListener implements Listener {
 	@EventHandler
 	public void onBreak(BlockBreakEvent e) {
 		e.setCancelled(true);
+	}
+
+	@EventHandler
+	public void onChat(AsyncPlayerChatEvent e) {
+		if(Game.isStarted())
+		{
+			e.setCancelled(true);
+		}
 	}
 
 	@EventHandler

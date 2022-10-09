@@ -53,6 +53,7 @@ public class Game {
     private static boolean started;
     @Getter
     private static int night = 0;
+    private static int indexNightRole = 0;
     @Getter
     private static boolean day;
     @Getter
@@ -63,6 +64,7 @@ public class Game {
         Collections.shuffle(roles);
         int indexRole = 0;
         for (Player player : players) {
+            player.removePotionEffect(PotionEffectType.BLINDNESS);
             LGPlayer newPlayer = new LGPlayer(player, roles.get(indexRole));
             getRoles().add(newPlayer.getRole());
             lgPlayers.add(newPlayer);
@@ -80,9 +82,10 @@ public class Game {
             WrapperPlayServerUpdateTime time = new WrapperPlayServerUpdateTime();
                             time.setAgeOfTheWorld(0);
                             time.setTimeOfDay((long)(6000));
+                            time.broadcastPacket();
             Game.broadcastMessage(
                     "Bienvenue dans cette game mes petits fratello\nPour commencer on on va choisir un maire, un leader, un boss bref celui qu'on écoute (donc pas loyo)\nVous avez 30 secondes pour faire un choix !");
-            Game.vote(30, () -> {
+            Game.vote(getInGame(),30, () -> {
                 Game.setMayor();
                 new BukkitRunnable() {
                     int timeoutLeft = 5*20;
@@ -124,6 +127,7 @@ public class Game {
             WrapperPlayServerUpdateTime time = new WrapperPlayServerUpdateTime();
             time.setAgeOfTheWorld(0);
             time.setTimeOfDay((long)(14500));
+            time.sendPacket(lgPlayer.getPlayer());
             for(LGPlayer hideLGPlayer : getInGame()) {
                 if(hideLGPlayer == lgPlayer)
                 {
@@ -138,25 +142,40 @@ public class Game {
 		}
 
         wait(5,() -> {
-            for(LGRole role: getRolesAlives())
-            {
-                Bukkit.getLogger().info(String.format("role : %s", role.getName()));
-                role.onNightTurn(getLgPlayersByRole(role.getName()));
-                // Game.NextDay();
-            }
+            InvokeNextRole();
         });
+    }
+
+    public static void InvokeNextRole()
+    {
+        if(indexNightRole >= getRolesAlives().size())
+        {
+            Game.NextDay();
+        }
+        else
+        {
+            LGRole currentRole = getRolesAlives().get(indexNightRole);
+            Bukkit.getLogger().info(String.format("role : %s, index: %s", currentRole.getName(),indexNightRole));
+            indexNightRole++;
+            currentRole.onNightTurn(getLgPlayersByRole(currentRole.getName()));
+        }
     }
 
     public static void NextDay()
     {
         for(LGPlayer player : getInGame())
         {
+            WrapperPlayServerUpdateTime time = new WrapperPlayServerUpdateTime();
+            time.setAgeOfTheWorld(0);
+            time.setTimeOfDay((long)(6000));
+            time.sendPacket(player.getPlayer());
+            player.getPlayer().removePotionEffect(PotionEffectType.BLINDNESS);
             for(LGPlayer showPlayer : getInGame())
             {
-                player.getPlayer().showPlayer(App.getInstance(), showPlayer.getPlayer());
-                WrapperPlayServerUpdateTime time = new WrapperPlayServerUpdateTime();
-                time.setAgeOfTheWorld(0);
-                time.setTimeOfDay((long)(6000));
+                if(!player.isDead())
+                {
+                    player.getPlayer().showPlayer(App.getInstance(), showPlayer.getPlayer());
+                }
             }
             if(player.isDead())
             {
@@ -304,10 +323,10 @@ public class Game {
         return nbVote;
     }
 
-    public static void vote(int seconds, Runnable callback) {
+    public static void vote(List<LGPlayer> players,int seconds, Runnable callback) {
         Game.cancelWait();
         Game.setWaitTicks(seconds * 20);
-        Game.GlobalSetAllowVote(true);
+        Game.GlobalSetAllowVote(players,true);
         waitTask = new BukkitRunnable() {
             @Override
             public void run() {
@@ -320,7 +339,7 @@ public class Game {
                 if (waitTicks == 0) {
                     waitTask = null;
                     cancel();
-                    Game.GlobalSetAllowVote(false);
+                    Game.GlobalSetAllowVote(players,false);
                     callback.run();
                 }
                 waitTicks--;
@@ -334,15 +353,15 @@ public class Game {
         for (Player player : Bukkit.getOnlinePlayers()) {
             player.removePotionEffect(PotionEffectType.BLINDNESS);
         }
-        GlobalSetAllowVote(false);
+        GlobalSetAllowVote(getLgPlayers(),false);
         inGame.clear();
         lgPlayers.clear();
         mayor = null;
         started = false;
     }
 
-    public static void GlobalSetAllowVote(boolean value) {
-        for (LGPlayer lgPlayer : Game.getInGame()) {
+    public static void GlobalSetAllowVote(List<LGPlayer> players,boolean value) {
+        for (LGPlayer lgPlayer : players) {
             lgPlayer.setVotedPlayer(null);
             lgPlayer.setHasVoted(false);
             lgPlayer.setVote(0);

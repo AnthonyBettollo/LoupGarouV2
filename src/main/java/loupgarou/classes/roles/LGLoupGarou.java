@@ -41,8 +41,9 @@ public class LGLoupGarou extends LGRole {
             player.getPlayer().removePotionEffect(PotionEffectType.BLINDNESS);
         }
 
-        Game.vote(30, () -> {
+        Game.vote(players,30, () -> {
             Game.setKilledByWolf();
+            Game.InvokeNextRole();
         });
     }
 }

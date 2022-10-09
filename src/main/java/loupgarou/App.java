@@ -134,8 +134,9 @@ public class App extends JavaPlugin {
 						Player currentPlayer = (Player) sender;
 						Location loc = currentPlayer.getLocation();
 						List<Location> spawns = (List<Location>) getConfig().getList("spawns");
-						spawns.add(new Location(Bukkit.getWorld("world"), (double) loc.getBlockX()+0.5, loc.getY(),
-								(double) loc.getBlockZ()+0.5, loc.getYaw(), loc.getPitch()));
+						getLogger().info(String.format("x : %s, y : %s , z : %s", ((double) loc.getBlockX())+0.5,loc.getY(),((double) loc.getBlockZ())+0.5));
+						spawns.add(new Location(Bukkit.getWorld("world"), ((double) loc.getBlockX())+0.5, loc.getY(),
+						((double) loc.getBlockZ())+0.5, loc.getYaw(), loc.getPitch()));
 						saveConfig();
 						reloadConfig();
 						sender.sendMessage("La position a bien été ajoutée !");
